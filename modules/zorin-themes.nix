@@ -15,21 +15,22 @@
     };
   };
 
-  # use config.* directly inside the template to avoid invalid nested ${...}
+  # 使用普通的多行字符串并用 builtins.toString 插入 config 值
   config = lib.mkIf config.programs.zorin-themes.enable {
     home.activation.zorin-themes = {
       text = "Symlink Zorin themes/icons to ~/.local/share for GNOME discovery";
-      script = lib.template ''
+      script = ''
         echo "Activating zorin-themes..."
 
         mkdir -p "$HOME/.local/share/themes" "$HOME/.local/share/icons"
 
-        if [ -z "${toString config.programs.zorin-themes.package}" ] || [ "${toString config.programs.zorin-themes.package}" = "null" ]; then
+        if [ -z "${builtins.toString config.programs.zorin-themes.package}" ] || \
+           [ "${builtins.toString config.programs.zorin-themes.package}" = "null" ]; then
           echo "programs.zorin-themes.package is not set; nothing to symlink."
           exit 0
         fi
 
-        src=${toString config.programs.zorin-themes.package}
+        src=${builtins.toString config.programs.zorin-themes.package}
         if [ ! -e "$src" ]; then
           echo "Specified package path $src does not exist."
           exit 1
