@@ -62,8 +62,6 @@
         }) systems);
 
       # 导出 home-manager module，用户可以通过 home-manager modules 导入
-      homeManagerModules.zorin-themes = (import ./modules/zorin-themes.nix {
-        inherit (builtins) ;
-      });
+      homeManagerModules.zorin-themes = import ./modules/zorin-themes.nix;
     };
 }

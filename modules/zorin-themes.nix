@@ -1,19 +1,16 @@
-{ lib ? (import <nixpkgs> {}).lib }:
-
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 let
-  cfg = config.programs."zorin-themes";
+  cfg = config.programs.zorin-themes;
 in
 {
-  options.programs."zorin-themes" = {
+  options.programs.zorin-themes = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;
       description = "Enable symlinking Zorin themes/icons into ~/.local/share for GNOME.";
     };
 
-    # 期望接收的是一个 store path 或者 null
     package = lib.mkOption {
       type = lib.types.nullOr lib.types.path;
       default = null;
@@ -29,12 +26,12 @@ in
 
         mkdir -p "$HOME/.local/share/themes" "$HOME/.local/share/icons"
 
-        if [ -z "${toString cfg.package}" ] || [ "${toString cfg.package}" = "null" ]; then
+        if [ -z "${toString ${cfg.package}}" ] || [ "${toString ${cfg.package}}" = "null" ]; then
           echo "programs.zorin-themes.package is not set; nothing to symlink."
           exit 0
         fi
 
-        src=${toString cfg.package}
+        src=${toString ${cfg.package}}
         if [ ! -e "$src" ]; then
           echo "Specified package path $src does not exist."
           exit 1
