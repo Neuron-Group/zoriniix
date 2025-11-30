@@ -1,8 +1,5 @@
 { config, pkgs, lib, ... }:
 
-let
-  cfg = config.programs.zorin-themes;
-in
 {
   options.programs.zorin-themes = {
     enable = lib.mkOption {
@@ -18,7 +15,8 @@ in
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  # use config.* directly inside the template to avoid invalid nested ${...}
+  config = lib.mkIf config.programs.zorin-themes.enable {
     home.activation.zorin-themes = {
       text = "Symlink Zorin themes/icons to ~/.local/share for GNOME discovery";
       script = lib.template ''
@@ -26,12 +24,12 @@ in
 
         mkdir -p "$HOME/.local/share/themes" "$HOME/.local/share/icons"
 
-        if [ -z "${toString ${cfg.package}}" ] || [ "${toString ${cfg.package}}" = "null" ]; then
+        if [ -z "${toString config.programs.zorin-themes.package}" ] || [ "${toString config.programs.zorin-themes.package}" = "null" ]; then
           echo "programs.zorin-themes.package is not set; nothing to symlink."
           exit 0
         fi
 
-        src=${toString ${cfg.package}}
+        src=${toString config.programs.zorin-themes.package}
         if [ ! -e "$src" ]; then
           echo "Specified package path $src does not exist."
           exit 1
