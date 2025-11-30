@@ -23,6 +23,7 @@
             # 开发时使用 fetchTarball 便于不需要事先知道 sha256。生产建议固定 rev + sha256。
             src = builtins.fetchTarball {
               url = "https://github.com/ZorinOS/zorin-desktop-themes/archive/refs/heads/master.tar.gz";
+              sha256 = "1n9rhayxv4rh3l86hqxqkpc3dayf9i91mhx4pfivd04kx6xd6aqm";
             };
             nativeBuildInputs = [ pkgs.glib ];
             buildPhase = "true";
