@@ -5,55 +5,57 @@
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;
-      description = "Enable symlinking Zorin themes/icons into ~/.local/share for GNOME.";
+      description = ''
+        Enable symlinking Zorin themes/icons into ~/.local/share for GNOME.
+      '';
     };
 
     package = lib.mkOption {
       type = lib.types.nullOr lib.types.path;
       default = null;
-      description = "Path to the packaged zorin-desktop-themes store path. If null, no symlinks are created.";
+      description = ''
+        Path to the packaged Zorin desktop themes. If null, no symlinks will be created.
+      '';
     };
   };
 
-  # 使用普通的多行字符串并用 builtins.toString 插入 config 值
   config = lib.mkIf config.programs.zorin-themes.enable {
-    home.activation.zorin-themes = {
-      text = "Symlink Zorin themes/icons to ~/.local/share for GNOME discovery";
-      script = ''
-        echo "Activating zorin-themes..."
+    home.activation.zorin-themes = ''
+      echo "Activating Zorin themes/icons..."
 
-        mkdir -p "$HOME/.local/share/themes" "$HOME/.local/share/icons"
+      # Ensure required directories exist
+      mkdir -p "$HOME/.local/share/themes" "$HOME/.local/share/icons"
 
-        if [ -z "${builtins.toString config.programs.zorin-themes.package}" ] || \
-           [ "${builtins.toString config.programs.zorin-themes.package}" = "null" ]; then
-          echo "programs.zorin-themes.package is not set; nothing to symlink."
-          exit 0
-        fi
+      # Validate the source package path
+      if [ -z "${builtins.toString config.programs.zorin-themes.package}" ] || \
+         [ "${builtins.toString config.programs.zorin-themes.package}" = "null" ]; then
+        echo "Error: programs.zorin-themes.package is not set. Nothing to symlink."
+        exit 0
+      fi
 
-        src=${builtins.toString config.programs.zorin-themes.package}
-        if [ ! -e "$src" ]; then
-          echo "Specified package path $src does not exist."
-          exit 1
-        fi
+      src=${builtins.toString config.programs.zorin-themes.package}
+      if [ ! -e "$src" ]; then
+        echo "Error: Specified package path $src does not exist."
+        exit 1
+      fi
 
-        # Symlink theme directories
-        if [ -d "$src/share/themes" ]; then
-          for p in "$src"/share/themes/*; do
-            [ -e "$p" ] || continue
-            ln -sfn "$p" "$HOME/.local/share/themes/$(basename "$p")"
-          done
-        fi
+      # Link theme directories
+      if [ -d "$src/share/themes" ]; then
+        for theme_dir in "$src/share/themes/"*; do
+          [ -e "$theme_dir" ] || continue
+          ln -sfn "$theme_dir" "$HOME/.local/share/themes/$(basename "$theme_dir")"
+        done
+      fi
 
-        # Symlink icon themes
-        if [ -d "$src/share/icons" ]; then
-          for p in "$src"/share/icons/*; do
-            [ -e "$p" ] || continue
-            ln -sfn "$p" "$HOME/.local/share/icons/$(basename "$p")"
-          done
-        fi
+      # Link icon directories
+      if [ -d "$src/share/icons" ]; then
+        for icon_dir in "$src/share/icons/"*; do
+          [ -e "$icon_dir" ] || continue
+          ln -sfn "$icon_dir" "$HOME/.local/share/icons/$(basename "$icon_dir")"
+        done
+      fi
 
-        echo "Zorin themes/icons linked into ~/.local/share."
-      '';
-    };
+      echo "Zorin themes/icons successfully linked to ~/.local/share."
+    '';
   };
 }
